@@ -1,29 +1,43 @@
 import axios from 'axios';
 import fs from 'fs';
-const getData = async (data) => {
-  const res = await axios.get('https://v1.hitokoto.cn', {
-    params: {
-      encode: 'json',
-    },
-  });
-  const resData = await res.data;
-  return resData;
+
+const sleep = (t) => {
+  return new Promise((resolve) => setTimeout(resolve, t));
+};
+
+const getData = async () => {
+  try {
+    const response = await axios.get('https://v1.hitokoto.cn', {
+      params: {
+        encode: 'json',
+      },
+    });
+    console.log('👍已获取数据！');
+    return await response.data;
+  } catch (e) {
+    console.log('🙀访问拒绝，等待中...');
+    await sleep(1000);
+    console.log('🐱重新获取数据...');
+    return {};
+  }
 };
 
 async function* generateSequence(end) {
   for (let i = 1; i <= end; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    yield i;
+    let response = {};
+    while (JSON.stringify(response) === '{}') {
+      response = await getData();
+    }
+    await sleep(200);
+    yield response;
   }
 }
 
 (async () => {
+  const count = 100;
   let data = [];
-  let generator = generateSequence(1);
-  for await (let value of generator) {
-    const response = await getData(data);
-    if (response) data.push(response);
-  }
+  let generator = generateSequence(count);
+  for await (let response of generator) data.push(response);
   fs.writeFile('data.json', JSON.stringify(data), () => {});
-  console.log('Done!');
+  console.log(`🎉好耶！已获取${count}条hitokoto语句！`);
 })();
