@@ -1,6 +1,10 @@
 import axios from 'axios';
 import fs from 'fs';
 
+const count = 100;
+const interval = 200;
+const sleep = 1000;
+
 const sleep = (t) => {
   return new Promise((resolve) => setTimeout(resolve, t));
 };
@@ -16,7 +20,7 @@ const getData = async () => {
     return await response.data;
   } catch (e) {
     console.log('🙀访问拒绝，等待中...');
-    await sleep(1000);
+    await sleep(sleep);
     console.log('🐱重新获取数据...');
     return {};
   }
@@ -28,13 +32,12 @@ async function* generateSequence(end) {
     while (JSON.stringify(response) === '{}') {
       response = await getData();
     }
-    await sleep(200);
+    await sleep(interval);
     yield response;
   }
 }
 
 (async () => {
-  const count = 100;
   let data = [];
   let generator = generateSequence(count);
   for await (let response of generator) data.push(response);
