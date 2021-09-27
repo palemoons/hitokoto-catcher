@@ -3,7 +3,7 @@ import fs from 'fs';
 
 const count = 100;
 const interval = 200;
-const sleep = 1000;
+const sleepTime = 1000;
 
 const sleep = (t) => {
   return new Promise((resolve) => setTimeout(resolve, t));
@@ -20,7 +20,7 @@ const getData = async () => {
     return await response.data;
   } catch (e) {
     console.log('🙀访问拒绝，等待中...');
-    await sleep(sleep);
+    await sleep(sleepTime);
     console.log('🐱重新获取数据...');
     return {};
   }
